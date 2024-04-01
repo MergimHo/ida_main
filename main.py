@@ -94,9 +94,9 @@ async def create_upload_files(file: UploadFile = File(...)):
   if not file or file.size == 0:
       log.error("File empty.")
       raise HTTPException(status_code=400, detail="No file uploaded.")
-  elif file.content_type not in ['application/vnd.ms-excel', 'text/csv'] or not file.filename.lower().endswith('.csv'):
+  elif file.content_type not in ['application/vnd.ms-excel', 'text/csv'] and not file.filename.lower().endswith('.csv'):
     log.error("No CSV data reiceived")
-    raise HTTPException(415, "Only CSV data allowed. File ending must be *.csv and correct content-type.")
+    raise HTTPException(415, "Only CSV data allowed. File ending must be *.csv or correct content-type.")
 
   log.info(f"Received uploaded file {file.filename}. Now trying to update.")
 
@@ -107,7 +107,7 @@ async def create_upload_files(file: UploadFile = File(...)):
     csv_data = [row for row in csv_reader]
     add_entries_to_dict(csv_data)
     fake_items_db = dict(sorted(fake_items_db.items(), reverse=True))
-    log.info
+    log.info(f"Updated {len(csv_data[1:])} entries.")
   except Exception as e:
         log.error("File was uploaded and a CSV but its content could not be processed due to invalid entries.")
         return JSONResponse(status_code=400, content={"message": "The request contained non-valid CSV data."})
@@ -155,6 +155,21 @@ def initialize_dict(fake_items_db, filename):
 # Helper method for testing purposes.
 def get_fake_items_db():
   return fake_items_db
+
+@app.get("/testdb")
+def get_fake_items_db():
+  return dict(sorted(fake_items_db.items(), reverse=True))
+
+@app.get("/refreshdb")
+def get_fake_items_db():
+  global fake_items_db
+  fake_items_db = dict()
+  fake_items_db = initialize_dict(fake_items_db=fake_items_db, filename="daxsp.csv")
+  return JSONResponse(status_code=200, content={"message": "Database resetted back to initial state."})
+
+
+
+
 
 fake_items_db = dict()
 fake_items_db = initialize_dict(fake_items_db=fake_items_db, filename="daxsp.csv")

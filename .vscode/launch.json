@@ -22,6 +22,7 @@
             "module": "uvicorn",
             "args": ["main:app","--reload", "--log-level", "debug"],
             "console": "integratedTerminal",
+            //"preLaunchTask": "activatePipenv"
         }
     ]
 }
