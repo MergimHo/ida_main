@@ -148,7 +148,7 @@ def test_csv_is_null(client, mocker):
 # POST if does not end with *.csv
 def test_csv_ends_not_with_csv(client, mocker):
     FILE_ENDING = 'XXX'
-    ERROR_MSG =  "Only CSV data allowed. File ending must be *.csv and correct content-type."
+    ERROR_MSG =  "Only CSV data allowed. File ending must be *.csv or correct content-type."
     mocker.patch('main.fake_items_db', SIMPLE_TEST_DATA)
 
     with open("test_resources\daxsp_c.csv", "rb") as csv_file:
@@ -175,7 +175,7 @@ def test_csv_correct_content_type(client, mocker):
 # POST if content_type is not  ['application/vnd.ms-excel', 'text/csv']
 def test_csv_wrong_content_type(client, mocker):
     WRONG_CONTENT_TYPE = "application/json"
-    ERROR_MSG =  "Only CSV data allowed. File ending must be *.csv and correct content-type."
+    ERROR_MSG =  "Only CSV data allowed. File ending must be *.csv or correct content-type."
     mocker.patch('main.fake_items_db', SIMPLE_TEST_DATA)
 
     with open("test_resources\daxsp_c.csv", "rb") as csv_file:
