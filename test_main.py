@@ -45,14 +45,14 @@ def test_helper_function():
 # /getDataAll with invalid index (not 'DAX' or 'SP500') should return HTTPException
 def test_invalid_index_for_getAll(client):
     ERROR_MSG = "Invalid Index parameter. Please choose 'DAX', 'SP500' or 'ALL'."
-    exception_response = client.get("/dataByIndex?index=INVALID_INDEX")
+    exception_response = client.get("/getdata?index=INVALID_INDEX")
     assert exception_response.status_code == 400
     assert exception_response.json()["detail"] == ERROR_MSG
 
 
 # /getDataAll with null should return 200 and the 'ALL' information in its header.
 def test_null_index_for_getAll_should_return_all(client):
-    exception_response = client.get("/dataByIndex")
+    exception_response = client.get("/getdata")
     assert exception_response.status_code == 200
     assert exception_response.headers["requested-index"] == "ALL"
 
@@ -62,7 +62,7 @@ def test_values_match_dax_explicit(client, mocker):
     dax_values = ['1', '2']
     mocker.patch('main.fake_items_db', SIMPLE_TEST_DATA)
 
-    dax_reponse = client.get("/dataByIndex?index=DAX")
+    dax_reponse = client.get("/getdata?index=DAX")
     body = dax_reponse.json()
     body_values = [indice[1] for page in body for indices in page.values() for indice in indices]
     assert body_values == dax_values
@@ -73,7 +73,7 @@ def test_index_DAX_should_not_contain_SP500(client, mocker):
     data = generate_test_data(number_of_entries=20, start_date=START_DATE)
     mocker.patch('main.fake_items_db', data)
 
-    dax_reponse = client.get("/dataByIndex?index=DAX")
+    dax_reponse = client.get("/getdata?index=DAX")
     body = dax_reponse.json()
 
     dax_values = [value['DAX'] for value in data.values()]
@@ -86,7 +86,7 @@ def test_values_match_sp500_explicit(client, mocker):
     sp500_values = ['600', '1200']
     mocker.patch('main.fake_items_db', SIMPLE_TEST_DATA)
 
-    sp500_response = client.get("/dataByIndex?index=SP500")
+    sp500_response = client.get("/getdata?index=SP500")
     body = sp500_response.json()
     body_values = [indice[1] for page in body for indices in page.values() for indice in indices]
     assert body_values == sp500_values
@@ -97,7 +97,7 @@ def test_index_SP500_should_not_contain_DAX(client, mocker):
     data = generate_test_data(number_of_entries=20, start_date=START_DATE)
     mocker.patch('main.fake_items_db', data)
 
-    dax_reponse = client.get("/dataByIndex?index=SP500")
+    dax_reponse = client.get("/getdata?index=SP500")
     body = dax_reponse.json()
 
     sp500_values = [value['SP500'] for value in data.values()]
@@ -107,7 +107,7 @@ def test_index_SP500_should_not_contain_DAX(client, mocker):
 
 """
 Here we craete a fake_db with a certain amount of entries and the expected pages.
-We test /dataByIndex and /dataAll here together because focus in this test on page numbers.
+We test /getdata and /getdatAll here together because focus in this test on page numbers.
 """
 @pytest.mark.parametrize("num_of_entries, expected_pages", [
     (0, 0), (29, 1), (30, 1), (31, 2), (60, 2),
@@ -118,12 +118,12 @@ def test_correct_page_numbers_by_index(client, mocker, num_of_entries, expected_
     data = generate_test_data(number_of_entries=num_of_entries, start_date=START_DATE)
     mocker.patch('main.fake_items_db', data)
 
-    response_by_index = client.get("/dataByIndex?index=DAX")
+    response_by_index = client.get("/getdata?index=DAX")
 
     assert response_by_index.status_code == 200, "Status code was not 200 as expected"
     assert len(response_by_index.json()) == expected_pages, f"Page number was {len(response_by_index.json())} not as expected {expected_pages}"
 
-    response_all = client.get("/dataAll")
+    response_all = client.get("/getdataAll")
 
     assert response_all.status_code == 200, "Status code was not 200 as expected"
     assert len(response_all.json()) == expected_pages, f"Page number was {len(response_all.json())} not as expected {expected_pages}"

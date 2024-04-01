@@ -44,7 +44,7 @@ async def read_item(date: str, index: str = "DAX", show_all_indices: Optional[bo
 Exercise 1: Get All Data By Index separated page by page with 30 entries by page
 Input parameter: 'DAX', 'SP500' or 'ALL'.
 """
-@app.get("/dataByIndex/")
+@app.get("/getdata/")
 async def read_item(index: str = Query("ALL", description="Index parameter, either 'DAX', 'SP500' or 'ALL'.")):
 
   index = index.upper() if index else None
@@ -75,16 +75,15 @@ async def read_item(index: str = Query("ALL", description="Index parameter, eith
 """
 Exercise 1: Get All Data separated page by page with 30 entries by page
 """
-@app.get("/dataAll")
+@app.get("/getdataAll")
 async def read_item_all():
-  log.info("Redirecting to /dataByIndex with parameter 'ALL'")
-  return RedirectResponse(url='/dataByIndex?index=ALL')
+  log.info("Redirecting to /getdata with parameter 'ALL'")
+  return RedirectResponse(url='/getdata?index=ALL')
 
-@app.get("/fullDatabase")
-async def get_full_database():
-  return JSONResponse(status_code=200, content=fake_items_db, headers={"requested-index": "full-data-base"})
+"""
+Exercise 2: Upload file with csv.
 
-
+"""
 @app.post("/uploadfile/")
 async def create_upload_files(file: UploadFile = File(...)):
   # add the entries of the uploaded file to fake_items_db
@@ -114,7 +113,6 @@ async def create_upload_files(file: UploadFile = File(...)):
         return JSONResponse(status_code=400, content={"message": "The request contained non-valid CSV data."})
 
   return JSONResponse(status_code=201, content={"message": "The Shared Indices were succesfully updated."})
-
 
 def add_entries_to_dict(data):
   """
